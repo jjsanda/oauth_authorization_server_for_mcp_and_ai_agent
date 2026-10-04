@@ -1,0 +1,23 @@
+stateDiagram-v2
+    [*] --> Active: user grants access<br/>(refresh token generation 1)
+
+    state "🟢 Family active" as Active {
+        direction LR
+        state "current generation" as cur
+        state "retired generations" as old
+        cur --> old: each refresh retires the token just used<br/>and issues the next generation
+    }
+
+    Active --> Expired: unused for 8 hours (idle cap)<br/>or 30 days old (absolute cap)
+    Active --> Revoked: 🚨 a RETIRED token is replayed (= theft),<br/>the client revokes the grant (RFC 7009),<br/>or its authorization code is replayed
+
+    state "🔴 Family revoked" as Revoked {
+        state "every refresh token dead" as d1
+        state "every access token revoked" as d2
+        d1 --> d2: one stolen token burns<br/>the whole grant, for everyone
+    }
+
+    state "⚪ Expired" as Expired
+
+    Revoked --> [*]
+    Expired --> [*]: user must consent again

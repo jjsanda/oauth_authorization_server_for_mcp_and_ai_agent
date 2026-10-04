@@ -1,0 +1,30 @@
+flowchart LR
+    subgraph client [" "]
+        agent["🤖 AI Agent<br/><i>autonomous OAuth client</i>"]
+        user["👤 Resource Owner<br/><i>alice — login &amp; consent</i>"]
+    end
+
+    subgraph as ["🔐 Authorization Server&nbsp;&nbsp;·&nbsp;&nbsp;:9000"]
+        direction TB
+        discovery["Discovery &amp; registration<br/><small>RFC 8414 metadata · RFC 7591 register</small>"]
+        grants["Token grants<br/><small>auth code + PKCE · client credentials<br/>refresh rotation · RFC 8693 exchange</small>"]
+        keys["Signing keys<br/><small>ES256 / EdDSA · JWKS · rotation</small>"]
+    end
+
+    subgraph resources ["Protected resource servers (MCP-style)"]
+        direction TB
+        tools["🧰 Tools API&nbsp;&nbsp;·&nbsp;&nbsp;:9100<br/><small>audience: tools-api<br/>scopes: tools:read, tools:invoke</small>"]
+        reports["📊 Reports API&nbsp;&nbsp;·&nbsp;&nbsp;:9200<br/><small>audience: reports-api<br/>scope: reports:read</small>"]
+    end
+
+    agent -- "① unauthenticated call → 401 points<br/>to the authorization server" --> tools
+    agent -- "② register, log in, consent,<br/>get audience-scoped token" --> as
+    user -.-> as
+    agent -- "③ call tools with a token<br/>minted ONLY for this server" --> tools
+    agent -- "④ exchange token to reach<br/>the second server (RFC 8693)" --> reports
+    tools -. "verify signatures via public keys (JWKS)" .-> keys
+    reports -. "verify signatures via public keys (JWKS)" .-> keys
+
+    style agent fill:#4f7cff,color:#fff,stroke:none
+    style user fill:#8a63d2,color:#fff,stroke:none
+    style client fill:none,stroke:none

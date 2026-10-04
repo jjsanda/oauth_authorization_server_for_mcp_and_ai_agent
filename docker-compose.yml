@@ -1,0 +1,94 @@
+# Demo topology: one authorization server and two instances of the same
+# resource-server binary with different identities, so audience restriction
+# and token exchange have two real targets. `docker compose --profile demo
+# run agent` (or `make demo`) runs the full protocol story against them.
+#
+# Service-DNS URLs (http://authserver:9000, …) are used as issuer and
+# resource identifiers so the containers can reach each other; for a
+# browser-walkable flow on the host, run the servers natively instead
+# (`make run-auth` / `make run-rs`, see README).
+
+services:
+  authserver:
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args: { COMPONENT: authserver }
+    environment:
+      AUTH_ADDR: ":9000"
+      AUTH_ISSUER: "http://authserver:9000"
+      AUTH_SIGNING_ALG: "ES256"
+      DEMO_RESOURCES: "http://tools-api:9100,http://reports-api:9200"
+      LOG_FORMAT: json
+    ports:
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD", "/app", "-healthcheck"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  tools-api:
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args: { COMPONENT: resourceserver }
+    environment:
+      RS_ADDR: ":9100"
+      RS_RESOURCE: "http://tools-api:9100"
+      RS_ISSUER: "http://authserver:9000"
+      RS_SCOPE_LIST: "tools:read"
+      RS_SCOPE_CALL: "tools:invoke"
+      LOG_FORMAT: json
+    ports:
+      - "9100:9100"
+    depends_on:
+      authserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/app", "-healthcheck"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  reports-api:
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args: { COMPONENT: resourceserver }
+    environment:
+      RS_ADDR: ":9200"
+      RS_RESOURCE: "http://reports-api:9200"
+      RS_ISSUER: "http://authserver:9000"
+      RS_SCOPE_LIST: "reports:read"
+      RS_SCOPE_CALL: "reports:read"
+      LOG_FORMAT: json
+    ports:
+      - "9200:9200"
+    depends_on:
+      authserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/app", "-healthcheck"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  # The demo agent: runs the whole story once and exits 0 only if every
+  # protocol assertion held. Enable with --profile demo.
+  agent:
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args: { COMPONENT: agent }
+    profiles: ["demo"]
+    environment:
+      AGENT_RESOURCE: "http://tools-api:9100"
+      AGENT_MODE: "headless"
+      AGENT_EXCHANGE_FOR: "http://reports-api:9200"
+      AGENT_DEMO_REFRESH_REPLAY: "true"
+    depends_on:
+      tools-api:
+        condition: service_healthy
+      reports-api:
+        condition: service_healthy

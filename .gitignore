@@ -1,0 +1,46 @@
+# Binaries
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Stray `go build ./cmd/<name>` output from the repo root (make build uses bin/)
+/authserver
+/resourceserver
+/agent
+
+# Test, coverage and profiling artifacts
+coverage.out
+coverage.html
+*.test
+*.prof
+*.pprof
+
+# Go workspace (local multi-module setup, not part of the project)
+go.work
+go.work.sum
+
+# Diagram tooling
+node_modules/
+
+# Local environment
+.env
+.env.*
+!.env.example
+*.local
+docker-compose.override.yml
+
+# Keys and certificates (AUTH_SIGNING_KEY_FILE points at a PKCS#8 PEM)
+*.pem
+*.key
+*.p8
+
+# Editor and OS noise
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    participant A as 🤖 Agent
+    participant AS as 🔐 Authorization Server
+    participant T as 🧰 Tools API
+    participant R as 📊 Reports API
+
+    Note over A,T: The agent holds a token minted ONLY for the Tools API
+    A->>T: tools/call · Bearer token (aud=tools-api)
+    T-->>A: 200 OK
+
+    Note over A,R: Reusing that token elsewhere fails by design
+    A->>R: tools/list · same token
+    R->>R: my audience is not in this token
+    R-->>A: 401 invalid_token (RFC 8707 audience restriction)
+
+    Note over A,AS: Instead of passing the token through,<br/>the agent asks for a purpose-built one (RFC 8693)
+    A->>AS: token exchange: subject_token + resource=reports-api + scope=reports:read
+    AS->>AS: subject token valid and unrevoked?<br/>scope only narrows? caller allowed this resource?
+    AS-->>A: new JWT · sub=user:u-alice (unchanged) · aud=reports-api · act=agent client
+
+    A->>R: tools/call whoami · Bearer new token
+    R-->>A: 200 · "subject: user:u-alice, actor: agent client"
+    Note over R: The delegation chain is visible downstream:<br/>WHO it is for and WHO is acting — no impersonation

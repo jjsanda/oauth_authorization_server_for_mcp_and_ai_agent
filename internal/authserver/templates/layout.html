@@ -1,0 +1,65 @@
+{{define "head"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · Authorization Server</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: light-dark(#f4f5f7, #16181d); color: light-dark(#1c1e21, #e8eaed);
+  }
+  .card {
+    width: min(26rem, 92vw); padding: 2rem 2.25rem; border-radius: 12px;
+    background: light-dark(#ffffff, #1f2229);
+    border: 1px solid light-dark(#e2e4e8, #2c3038);
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.08);
+  }
+  h1 { font-size: 1.15rem; margin: 0 0 0.25rem; }
+  p.sub { margin: 0 0 1.5rem; font-size: 0.85rem; color: light-dark(#5f6672, #9aa2ad); }
+  label { display: block; font-size: 0.8rem; font-weight: 600; margin: 0.9rem 0 0.3rem; }
+  input[type=text], input[type=password] {
+    width: 100%; padding: 0.55rem 0.7rem; border-radius: 8px; font-size: 0.95rem;
+    border: 1px solid light-dark(#cfd3da, #3a3f49);
+    background: light-dark(#fbfbfc, #171a20); color: inherit;
+  }
+  input:focus { outline: 2px solid #4f7cff; outline-offset: 0; border-color: transparent; }
+  .actions { display: flex; gap: 0.6rem; margin-top: 1.4rem; }
+  button {
+    flex: 1; padding: 0.6rem 0.9rem; border-radius: 8px; border: none;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  }
+  button.primary { background: #4f7cff; color: #fff; }
+  button.secondary {
+    background: transparent; color: inherit;
+    border: 1px solid light-dark(#cfd3da, #3a3f49);
+  }
+  .error {
+    margin: 0 0 1rem; padding: 0.6rem 0.8rem; border-radius: 8px; font-size: 0.85rem;
+    background: light-dark(#fdecec, #3a2023); color: light-dark(#b3261e, #f2b8b5);
+  }
+  ul.grants { list-style: none; padding: 0; margin: 0.4rem 0 0; }
+  ul.grants li {
+    padding: 0.45rem 0.7rem; margin-bottom: 0.4rem; border-radius: 8px; font-size: 0.85rem;
+    background: light-dark(#f1f3f6, #262a32);
+    font-variant-numeric: tabular-nums;
+  }
+  ul.grants li code { font-size: 0.8rem; }
+  .hint { margin-top: 1.3rem; font-size: 0.75rem; color: light-dark(#8a919c, #6f7680); }
+  .section { margin-top: 1.1rem; font-size: 0.8rem; font-weight: 600;
+    color: light-dark(#5f6672, #9aa2ad); text-transform: uppercase; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+<main class="card">
+{{end}}
+
+{{define "foot"}}
+</main>
+</body>
+</html>
+{{end}}

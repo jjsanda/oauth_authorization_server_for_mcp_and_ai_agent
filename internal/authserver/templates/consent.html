@@ -1,0 +1,23 @@
+{{define "consent"}}{{template "head" .}}
+<h1>Authorize {{.ClientName}}?</h1>
+<p class="sub">Signed in as <strong>{{.Username}}</strong></p>
+
+<div class="section">This application will be able to</div>
+<ul class="grants">
+  {{range .Scopes}}<li><code>{{.}}</code></li>{{end}}
+</ul>
+
+<div class="section">On these services</div>
+<ul class="grants">
+  {{range .Resources}}<li><code>{{.}}</code></li>{{end}}
+</ul>
+
+<form method="post" action="/consent">
+  <input type="hidden" name="req" value="{{.ReqID}}">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="actions">
+    <button class="secondary" type="submit" name="action" value="deny">Deny</button>
+    <button class="primary" type="submit" name="action" value="approve">Allow</button>
+  </div>
+</form>
+{{template "foot" .}}{{end}}

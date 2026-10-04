@@ -1,0 +1,8 @@
+.git
+bin
+docs
+node_modules
+coverage.out
+coverage.html
+*.md
+.github

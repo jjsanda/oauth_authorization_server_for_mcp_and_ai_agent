@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor U as 👤 alice (browser)
+    participant A as 🤖 Agent
+    participant RS as 🧰 Tools API
+    participant AS as 🔐 Authorization Server
+
+    Note over A,RS: Discovery — the agent starts with nothing but the tool server's URL
+    A->>RS: call tools (no token)
+    RS-->>A: 401 + "my auth server is over there" (RFC 9728)
+    A->>AS: read server metadata (RFC 8414)
+    A->>AS: register itself as a client (RFC 7591)
+    AS-->>A: client_id + client_secret
+
+    Note over A,AS: Authorization — the user stays in control
+    A->>A: create PKCE secret + one-way challenge (S256)
+    A->>U: open the authorization link
+    U->>AS: log in and review the consent screen
+    AS-->>U: redirect back with a one-time code (+ state, iss)
+    U->>A: code arrives on the agent's loopback port (RFC 8252)
+    A->>A: verify state (anti-CSRF) and iss (RFC 9207)
+
+    Note over A,AS: Redemption — proof of possession, audience pinned
+    A->>AS: code + PKCE verifier + resource=tools-api (RFC 8707)
+    AS->>AS: one-time code? PKCE match? client + redirect bound?
+    AS-->>A: JWT access token (aud=tools-api only) + refresh token
+
+    Note over A,RS: Use — the resource server verifies locally
+    A->>RS: tools/call with Bearer token
+    RS->>AS: fetch public keys once (JWKS, cached)
+    RS->>RS: check signature, issuer, expiry, audience, scope
+    RS-->>A: tool result
